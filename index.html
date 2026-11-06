@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد جامع زیست سلولی</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- فراخوانی دیتای یکپارچه ساخته شده توسط پایتون (دور زدن محدودیت مرورگر) -->
+    <script src="bookData.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+
+        /* استایل سایدبار */
+        .sidebar {
+            width: 320px;
+            background: #1e293b;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background: #0f172a;
+            text-align: center;
+            border-bottom: 2px solid #334155;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            color: #38bdf8;
+        }
+
+        .module-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .module-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 15px;
+            margin-bottom: 10px;
+            background: #334155;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: right;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .module-btn:hover {
+            background: #475569;
+            transform: translateX(-5px);
+        }
+
+        .module-btn.active {
+            background: #38bdf8;
+            color: #0f172a;
+            border-color: #38bdf8;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* استایل محتوای اصلی */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #ffffff;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .content-box {
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 2;
+            font-size: 1.15rem;
+            padding-bottom: 100px;
+        }
+
+        .content-box h1 {
+            color: #0f172a;
+            border-bottom: 3px solid #38bdf8;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .content-box h3 {
+            color: #475569;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+        }
+
+        .blog-content p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        /* استایل بخش کوئیزها (تعاملی) */
+        .quiz-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 2px dashed #cbd5e1;
+        }
+
+        .quiz-section h2 {
+            color: #ef4444;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-card {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .question-card h3 {
+            margin-top: 0;
+            color: #334155;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .option:hover {
+            border-color: #94a3b8;
+            background: #f1f5f9;
+        }
+
+        .option.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .option.wrong {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .explanation {
+            display: none;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background: #e0f2fe;
+            border-radius: 10px;
+            font-size: 1rem;
+            border-right: 5px solid #0ea5e9;
+            color: #0369a1;
+            line-height: 1.8;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* واترمارک شیشه‌ای اختصاصی استاد */
+        .watermark {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            z-index: 9999;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .watermark::before {
+            content: '🧬';
+            font-size: 1.6rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .watermark span {
+            background: linear-gradient(45deg, #0ea5e9, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="watermark">
+        زیست سلولی <span>دکتر علیرضا مهرعلیخانی</span>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>پلتفرم آموزش تعاملی</h2>
+        </div>
+        <div class="module-list" id="module-list"></div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="content-box" id="content-box">
+            <div style="text-align: center; margin-top: 30vh; color: #94a3b8;">
+                <h1 style="border:none; color:#64748b; font-size: 2rem;">در حال پردازش...</h1>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // به محض لود شدن صفحه، اطلاعات را از متغیر bookData (تولید شده توسط پایتون) می‌خواند
+        window.onload = () => {
+            if (typeof bookData === 'undefined' || bookData.length === 0) {
+                document.getElementById('content-box').innerHTML = `
+                    <div style="text-align: center; margin-top: 30vh; color: #ef4444;">
+                        <h1 style="border:none; color:#ef4444; font-size: 2rem;">خطا در بارگذاری</h1>
+                        <p>فایل bookData.js پیدا نشد. لطفاً اسکریپت merge.py را اجرا کنید تا اطلاعات ساخته شود.</p>
+                    </div>`;
+                return;
+            }
+            buildSidebar();
+        };
+
+        function buildSidebar() {
+            const listContainer = document.getElementById('module-list');
+            listContainer.innerHTML = ''; 
+
+            bookData.forEach((mod, index) => {
+                if (!mod) return;
+                const btn = document.createElement('button');
+                btn.className = 'module-btn';
+                btn.innerText = mod.shortTitle || mod.title || `ماژول ${index + 1}`;
+                btn.onclick = () => renderModule(index, btn);
+                listContainer.appendChild(btn);
+            });
+
+            if (listContainer.firstChild) {
+                listContainer.firstChild.click();
+            }
+        }
+
+        function renderModule(index, btnNode) {
+            document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+            if(btnNode) btnNode.classList.add('active');
+
+            const mod = bookData[index];
+            const box = document.getElementById('content-box');
+            
+            let html = `<h1>${mod.title || `ماژول ${index + 1}`}</h1>`;
+            if (mod.subtitle) {
+                html += `<h3>${mod.subtitle}</h3>`;
+            }
+            html += `<div class="blog-content">${mod.content || ''}</div>`;
+            
+            const quizData = mod.quiz || mod.quizzes; 
+
+            if (quizData && quizData.length > 0) {
+                html += `<div class="quiz-section"><h2>🎯 آزمون سنجش مهارت</h2>`;
+                
+                quizData.forEach((q, qIndex) => {
+                    html += `<div class="question-card">
+                        <h3>${qIndex + 1}- ${q.question}</h3>
+                        <div class="options">`;
+                    
+                    q.options.forEach((opt, oIndex) => {
+                        const isCorrect = (oIndex === q.answer);
+                        html += `<div class="option" onclick="handleAnswer(this, ${isCorrect}, 'exp_${index}_${qIndex}')">
+                            ${oIndex + 1}) ${opt}
+                        </div>`;
+                    });
+                    
+                    html += `</div>
+                        <div class="explanation" id="exp_${index}_${qIndex}">
+                            <strong>💡 پاسخنامه تشریحی:</strong><br>
+                            ${q.explanation}
+                        </div>
+                    </div>`;
+                });
+                
+                html += `</div>`;
+            }
+            
+            box.innerHTML = html;
+            document.getElementById('main-content').scrollTo(0, 0);
+        }
+
+        function handleAnswer(element, isCorrect, expId) {
+            const parent = element.parentElement;
+            if(parent.classList.contains('answered')) return;
+            parent.classList.add('answered');
+
+            const options = parent.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+            }
+            
+            const explanationBox = document.getElementById(expId);
+            if (explanationBox) {
+                explanationBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
